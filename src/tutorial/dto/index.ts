@@ -1,0 +1,1 @@
+export { CreateTutorialDTO } from './create-tutorial.dto';

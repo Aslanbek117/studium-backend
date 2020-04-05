@@ -1,0 +1,1 @@
+export { CreateChapterDTO } from './create-chapter.dto';
