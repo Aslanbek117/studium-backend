@@ -47,7 +47,7 @@ export class SolverService {
     let stderrs: string[] = [];
     for (i = 0 ; i< input.length; i++) {
       const start = Date.now();
-      const result: Promise<any> = cpp.runFile('/Users/aslan/nodejs/nestjs-realworld-example-app/' + fileName, { stdin: input[i] });
+      const result: Promise<any> = cpp.runFile('./' + fileName, { stdin: input[i] });
       const ss = await result;
       stdouts.push(ss.stdout);
       stderrs.push(ss.stderr);
