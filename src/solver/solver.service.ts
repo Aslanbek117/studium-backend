@@ -50,7 +50,7 @@ export class SolverService {
     let stderrs: string[] = [];
     for (i = 0 ; i< input.length; i++) {
       const start = Date.now();
-      const result: Promise<any> = cpp.runFile(__dirname + fileName, { stdin: input[i] });
+      const result: Promise<any> = cpp.runFile(__dirname + "/" + fileName, { stdin: input[i] });
       const ss = await result;
       stdouts.push(ss.stdout);
       stderrs.push(ss.stderr);
