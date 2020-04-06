@@ -28,7 +28,9 @@ export class SolverService {
     const user = await this.userRepo.findOne({where: { id: body.userId}});
     const tutorial = await this.tutorialRepo.findOne({where: { id: body.tutorialId}})
     const fileName: string = user.email + "-" + tutorial.id + ".cpp";
-    fs.writeFile(fileName, body.userCode
+    fs.writeFile(
+      "./"+fileName,
+       body.userCode
     , function (err) {
       if (err) throw err;
     });
