@@ -27,7 +27,7 @@ export class SolverService {
   async findAll(body: CreateSolverDTO): Promise<SolverEntity> {
     const user = await this.userRepo.findOne({where: { id: body.userId}});
     const tutorial = await this.tutorialRepo.findOne({where: { id: body.tutorialId}})
-    const fileName: string = user.email + "-" + tutorial.id + ".cpp";
+    const fileName: string = user.email + "-" + tutorial.id + ".c";
     fs.writeFile(
       __dirname +"/" +fileName,
        body.userCode
@@ -52,7 +52,7 @@ export class SolverService {
     let stderrs: string[] = [];
     for (i = 0 ; i< input.length; i++) {
       const start = Date.now();
-      const result: Promise<any> = cpp.runFile(__dirname + "/" + fileName, { stdin: input[i] });
+      const result: Promise<any> = c.runFile(__dirname + "/" + fileName, { stdin: input[i] });
       const ss = await result;
       stdouts.push(ss.stdout);
       stderrs.push(ss.stderr);
