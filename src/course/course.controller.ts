@@ -18,13 +18,13 @@ export class CourseController {
     return await this.courseService.findAll(query);
   }
 
-  @Get(':id')
+  @Get('/id/:id')
   async findBYId(@Param() id): Promise<CourseRO> {
     console.log("Id")
     return await this.courseService.findById(id);
   }
 
-  @Get(':title')
+  @Get('/title/:title')
   async findOne(@Param() title): Promise<CourseRO> {
     console.log("SLUGG", title);
     return await this.courseService.findOne(title);
