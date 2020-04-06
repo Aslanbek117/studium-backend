@@ -17,7 +17,7 @@ export class UserController {
     return await this.userService.findByEmail(email);
   }
 
-  @Get('/users')
+  @Get('/users/all')
   async findAll(): Promise<UserEntity[]> {
     return await this.userService.findAll();
   }

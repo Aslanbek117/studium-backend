@@ -10,7 +10,7 @@ export class ChapterController {
 
   constructor(private readonly chapterService: ChapterService) {}
 
-  @Get('all')
+  @Get('/chapters/all')
   async findAll(): Promise<ChapterEntity[]> {
     console.log("DADSA");
     return await this.chapterService.findAll();

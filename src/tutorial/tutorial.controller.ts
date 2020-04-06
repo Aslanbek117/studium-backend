@@ -12,7 +12,7 @@ export class TutorialController {
 
   constructor(private readonly tutorialService: TutorialService) {}
 
-  @Get('all')
+  @Get('/tutorials/all')
   async findAll(): Promise<TutorialEntity[]> {
     console.log("DADSA");
     return await this.tutorialService.findAll();
