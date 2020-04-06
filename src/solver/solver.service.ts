@@ -32,6 +32,9 @@ export class SolverService {
     , function (err) {
       if (err) throw err;
     });
+    console.log("fileName", fileName)
+
+    console.log("to exec", __dirname + fileName);
     const compile_result = await this.compile_run(body.userId, body.tutorialId,  fileName, tutorial.input, tutorial.output);
     return compile_result;
   }
@@ -47,7 +50,7 @@ export class SolverService {
     let stderrs: string[] = [];
     for (i = 0 ; i< input.length; i++) {
       const start = Date.now();
-      const result: Promise<any> = cpp.runFile('./' + fileName, { stdin: input[i] });
+      const result: Promise<any> = cpp.runFile(__dirname + fileName, { stdin: input[i] });
       const ss = await result;
       stdouts.push(ss.stdout);
       stderrs.push(ss.stderr);
