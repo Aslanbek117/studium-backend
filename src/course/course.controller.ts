@@ -13,7 +13,7 @@ export class CourseController {
 
   constructor(private readonly courseService: CourseService) {}
 
-  @Get('all')
+  @Get('/all')
   async findAll(@Query() query): Promise<CoursesRO> {
     return await this.courseService.findAll(query);
   }
@@ -45,9 +45,9 @@ export class CourseController {
 
 
   @Post("create")
-  async create(@User('id') userId: number, @Body('course') courseData: CreateCourseDto) {
+  async create(@Body('course') courseData: CreateCourseDto) {
     console.log("create course");
-    return this.courseService.create(userId, courseData);
+    return this.courseService.create(courseData);
   }
 
   @Post('update')

@@ -84,7 +84,7 @@ export class CourseService {
     return {course};
   }
 
-  async create(userId: number, courseData: CreateCourseDto): Promise<CourseEntity> {
+  async create(courseData: CreateCourseDto): Promise<CourseEntity> {
 
     let course = new CourseEntity();
     course.title = courseData.title;
@@ -97,15 +97,15 @@ export class CourseService {
 
     const newCourse = await this.courseRepository.save(course);
 
-    const author = await this.userRepository.findOne({ where: { id: userId } });
+    // const author = await this.userRepository.findOne({ where: { id: userId } });
 
-    if (Array.isArray(author.courses)) {
-      author.courses.push(course);
-    } else {
-      author.courses = [course];
-    }
+    // if (Array.isArray(author.courses)) {
+    //   author.courses.push(course);
+    // } else {
+    //   author.courses = [course];
+    // }
 
-    await this.userRepository.save(author);
+    // await this.userRepository.save(author);
 
     return newCourse;
 
