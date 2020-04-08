@@ -2,7 +2,7 @@ import {Get, Post, Body, Put, Delete, Query, Param, Controller} from '@nestjs/co
 import { Request } from 'express';
 import { CourseService } from './course.service';
 import { CreateCourseDto, CreateCommentDto, DeleteCourseDto } from './dto';
-import { CoursesRO, CourseRO } from './course.interface';
+import { CoursesRO, CourseRO, CoursesWithStudentsDTO } from './course.interface';
 import { CommentsRO } from './course.interface';
 import { User } from '../user/user.decorator';
 import { CourseEntity } from './course.entity';
@@ -14,7 +14,7 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get('/all')
-  async findAll(@Query() query): Promise<CoursesRO> {
+  async findAll(@Query() query): Promise<CoursesWithStudentsDTO> {
     return await this.courseService.findAll(query);
   }
 
@@ -37,9 +37,10 @@ export class CourseController {
     return response;
   }
 
-  @Post('enroll')
-  async enroll(@Body('user_id') user_id: string, @Body('course_id') course_id: string): Promise<UserEntity> {
-    const user = await this.courseService.addToCourse(user_id, course_id);
+  @Post('/course/enroll')
+  async enroll(@Body('user_id') user_id: string, @Body('course_id') course_id: string, @Body("is_delete") is_delete: boolean): Promise<String> {
+    console.log("ENROLL");
+    const user = await this.courseService.addToCourse(user_id, course_id, is_delete);
     return user;
   }
 

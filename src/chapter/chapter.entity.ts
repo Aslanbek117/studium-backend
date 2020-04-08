@@ -29,7 +29,7 @@ export class ChapterEntity {
   @ManyToOne(type => CourseEntity, art => art.chapters, {onDelete: "CASCADE"})
   course: CourseEntity;
 
-  @OneToMany(type => TutorialEntity, t => t.chapter, {onDelete: "CASCADE"})
+  @OneToMany(type => TutorialEntity, t => t.chapter, {onDelete: "CASCADE", cascade: true})
   tutorials: TutorialEntity[];
 
   @ManyToOne(type => UserEntity, user => user.courses, {onDelete: "CASCADE"})

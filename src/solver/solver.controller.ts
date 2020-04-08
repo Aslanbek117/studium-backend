@@ -12,7 +12,7 @@ export class SolverController {
 
   @Post('test')
   async test(@Body('test') testDTO: CreateSolverDTO): Promise<any> {
-    return await this.solverService.findAll(testDTO);
+    return await this.solverService.doodle(testDTO);
   }
 
 }

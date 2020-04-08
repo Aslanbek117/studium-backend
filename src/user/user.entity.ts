@@ -49,6 +49,7 @@ export class UserEntity {
   // @JoinTable()
   // favorites: ArticleEntity[];
 
-  @OneToMany(type => CourseEntity, course => course.author)
+  @ManyToMany(type => CourseEntity, course => course.students, {cascade: true})
+  @JoinTable()
   courses: CourseEntity[];
 }

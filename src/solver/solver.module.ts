@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod, HttpModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/user.entity';
 import { AuthMiddleware } from '../user/auth.middleware';
@@ -11,7 +11,7 @@ import { TutorialEntity } from '../tutorial/tutorial.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SolverEntity, UserEntity, CourseEntity, TutorialEntity, UserEntity]), UserModule],
+  imports: [TypeOrmModule.forFeature([SolverEntity, UserEntity, CourseEntity, TutorialEntity, UserEntity]), UserModule, HttpModule],
   providers: [SolverService],
   controllers: [
     SolverController

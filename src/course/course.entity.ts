@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany, JoinColumn, AfterUpdate, BeforeUpdate } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany, JoinColumn, AfterUpdate, BeforeUpdate, ManyToMany } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { Comment } from './comment.entity';
 import { TutorialEntity } from '../tutorial/tutorial.entity';
 import { ChapterEntity } from '../chapter/chapter.entity';
+import { User } from 'src/user/user.decorator';
 
 @Entity('course')
 export class CourseEntity {
@@ -49,7 +50,10 @@ export class CourseEntity {
   author: UserEntity;
 
 
-  @OneToMany(type => ChapterEntity, ch => ch.course, {onDelete: "CASCADE"})
+  @ManyToMany(type => UserEntity, user => user.courses)
+  students: UserEntity[]
+
+  @OneToMany(type => ChapterEntity, ch => ch.course, {onDelete: "CASCADE", cascade: true})
   @JoinColumn()
   chapters: ChapterEntity[];
 
@@ -60,7 +64,7 @@ export class CourseEntity {
   @Column({nullable: true})
   tutorialCount: string;
 
-  @OneToMany(type => Comment, comment => comment.article, {eager: true, onDelete: "CASCADE"})
+  @OneToMany(type => Comment, comment => comment.article, {eager: true, onDelete: "CASCADE", cascade: true})
   @JoinColumn()
   comments: Comment[];
 
