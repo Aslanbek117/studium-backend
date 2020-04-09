@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany, JoinColumn, AfterUpdate, BeforeUpdate, ManyToMany } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { ChapterEntity } from '../chapter/chapter.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 
 
@@ -42,11 +43,12 @@ export class TutorialEntity {
   @ManyToOne(type => ChapterEntity, art => art.tutorials, {onDelete: "CASCADE"})
   chapter: ChapterEntity;
 
-  @ManyToOne(type => UserEntity, user => user.courses, {onDelete: "CASCADE"})
+  @OneToOne(type => UserEntity, user => user)
   author: UserEntity;
 
-  @ManyToMany(type => UserEntity, user => user.courses, {onDelete: "CASCADE"})
-  user: UserEntity;
+  @OneToMany(type => UserToTutorials, utt => utt.tutorial)
+  userToTutorials: UserToTutorials[];
+  
 
   @Column({type: 'simple-array', nullable: true})
   tags: string[];

@@ -9,10 +9,11 @@ import { TutorialService } from './tutorial.service';
 import { TutorialEntity } from './tutorial.entity';
 import { CourseModule } from '../course/course.module';
 import { ChapterEntity } from '../chapter/chapter.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ChapterEntity, UserEntity, TutorialEntity]), UserModule, CourseModule],
+  imports: [TypeOrmModule.forFeature([ChapterEntity, UserEntity, TutorialEntity, UserToTutorials]), UserModule, CourseModule],
   providers: [TutorialService],
   controllers: [
     TutorialController

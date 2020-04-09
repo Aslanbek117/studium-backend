@@ -1,15 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getRepository, DeleteResult, QueryBuilder } from 'typeorm';
+import { Repository, getRepository, DeleteResult, QueryBuilder, In } from 'typeorm';
 import { CourseEntity } from './course.entity';
 import { Comment } from './comment.entity';
 import { UserEntity } from '../user/user.entity';
 import { CreateCourseDto, DeleteCourseDto } from './dto';
 
-import {CourseRO, CoursesRO, CommentsRO, NewUserEntity, CoursesWithStudentsDTO, MonitoringCourseEntity, TutorialAndCompleted} from './course.interface';
+import {CourseRO, CoursesRO, CommentsRO, NewUserEntity, CoursesWithStudentsDTO, MonitoringCourseEntity, TutorialAndCompleted, UserWithCourses} from './course.interface';
 import { cursorTo } from 'readline';
 import { CourseModule } from './course.module';
 import { statSync } from 'fs';
+import { SampleUser } from './SampleUser.entity';
+import { SamplePost } from './SamplePost.entity';
+import { TutorialEntity } from 'src/tutorial/tutorial.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 const slug = require('slug');
 
 @Injectable()
@@ -21,160 +25,166 @@ export class CourseService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(SamplePost)
+    private readonly samplePostRepository: Repository<SamplePost>,
+    @InjectRepository(SampleUser)
+    private readonly sampleUserRepository: Repository<SampleUser>,
+    @InjectRepository(UserToTutorials)
+    private readonly userToTutorials: Repository<UserToTutorials>
   ) {}
 
-  async findAll(query): Promise<CoursesWithStudentsDTO> {
 
-    const users = await this.userRepository.find({relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
 
-    const courses = await this.courseRepository.find({relations: ['chapters', 'chapters.tutorials', 'students', 'students.courses', 'students.courses.chapters', 'students.courses.chapters.tutorials']})
 
-    let stc: UserEntity[] = [];
+    async findSampleUsers(): Promise<SampleUser[]> {
 
-    let newUserEntity: NewUserEntity[] = [];
+      const users = await this.userRepository.find();
 
-    users.map(u => {
-       u.courses.map(c => {
-        let tempUserEntity: NewUserEntity = {} as any;
-        tempUserEntity.email = u.email;
-        tempUserEntity.id = u.id.toString();
-        tempUserEntity.lastname = u.lastname;
-        tempUserEntity.username = u.username;
-        c.chapters.map(ch => {
-          ch.tutorials.map(t => {
-            if (u.id == 36) {
-              console.log("alex", u.username);
-            }
-              let status: TutorialAndCompleted = {
-                tutorialId: t.id,
-                isCompleted: t.isCompleted
-              }
-
-              if (u.id == 36) {
-                console.log("status", status);
-              }
-              if (!tempUserEntity.tutorialStatus || tempUserEntity.tutorialStatus == undefined) {
-                tempUserEntity.tutorialStatus = [status]
-              } else {
-                tempUserEntity.tutorialStatus.push(status);
-              }
-          })
-        })
-        newUserEntity.push(tempUserEntity);
+      users.map(async u => {
+        const tt = await this.userToTutorials.findOne({where: {userId: u.id}});
+        tt.email = u.email;
+        tt.lastname = u.lastname;
+        tt.username = u.username;
+        tt.course = u.course;
+        await this.userToTutorials.save(tt);
       })
-    })
-    
-   
-    courses.map( c => {
-      c.chapterCount = c.chapters.length.toString();
-      let count = 0;
-      c.chapters.map ( ch => {
-        count += ch.tutorials.length;
-      })
-      c.tutorialCount = count.toString();
-    })
-    const coursesCount = courses.length
-    
-    let mce: MonitoringCourseEntity[] = [];
 
 
 
-    
-    courses.map( c => {
-      let temp: MonitoringCourseEntity = {
-        id: c.id,
-        slug: c.slug,
-        title: c.title,
-        description: c.description,
-        body: c.body,
-        card_description: c.card_description,
-        course_overview: c.course_overview,
-        img_url: c.img_url,
-        created: c.created,
-        updated: c.updated,
-        chapters: c.chapters
-      }
-      if (mce == undefined) {
-        mce = [temp]
-      } else {
-        mce.push(temp);
-      }
-    })
 
-    const response: CoursesWithStudentsDTO =  {
-      courses: mce,
-      user: newUserEntity
-    }
-    return response;
 
-  }
 
-  async addToCourse(user_id: string, course_id: string, is_delete: boolean): Promise<String> {
-    
-    const user = await this.userRepository.findOne({ where: { id: user_id}, relations: ['courses']});
-
-    const course = await this.courseRepository.findOne({where: { id: course_id}, relations: ['students']});
-
-    let isUserInCourse = false;
-    if (course.students &&  course.students.length == 0) {
-      course.students = [user];
-      user.courses = [course];
-      await this.courseRepository.save(course);
-      await this.userRepository.save(user);
-    } else {
-      course.students.map( user => {
-        if (user.id.toString() == user_id) {
-          isUserInCourse = true;
-        } 
-      })
+      return this.sampleUserRepository.find({relations: ["posts"]});
     }
 
-    if (!isUserInCourse) {
-      course.students.push(user);
-      user.courses.push(course);
-      await this.courseRepository.save(course);
-      await this.userRepository.save(user);
+    async findSamplePosts(): Promise<SamplePost[]> {
+      return this.samplePostRepository.find({relations: ['users']});
     }
 
-    if (is_delete == true) {
-      let courseS: CourseEntity[] = [];
+    async createSampleUser(name: string, postId?: string): Promise<SampleUser> {
+      const samplePost = await this.samplePostRepository.findOne({where: {id: postId}});
 
-      user.courses.map( c => {
-        if (c.id != course_id) {
-          if (courseS == undefined) {
-            courseS = [c];
-          } else {
-            courseS.push(c);
-          }
-        }
-      })
-      if (user.courses == undefined || user.courses.length == 0) {
-        user.courses = [];
-      } else {
-        user.courses = courseS;
+      let sampleUser = new SampleUser();
+      sampleUser.name = name;
+      if (postId != undefined ) {
+        sampleUser.posts.push(samplePost);
       }
       
-      await this.userRepository.save(user);
-      let coursesT: UserEntity[] = [];
-      course.students.map(st => {
-        if (st.id != user.id)  {
-          if (coursesT == undefined) {
-            coursesT = [st];
-          } else {
-            coursesT.push(st);
-          }
-        }
-      })
 
-      if (course.students == undefined || course.students.length == 0) {
-        course.students = [];
+      return this.sampleUserRepository.save(sampleUser);
+    }
+
+    async addUserToPost(userId: string, postId: string): Promise<SamplePost> {
+      const post = await this.samplePostRepository.findOne({where: {id:postId}, relations: ['users']});
+      const user = await this.sampleUserRepository.findOne({where: {id: userId}, relations: ['posts']});
+      if (post.users == undefined) {
+        post.users = [user];
       } else {
-        course.students = coursesT;
+        post.users.push(user);
       }
+      return this.samplePostRepository.save(post);
+
+    }
+
+    
+    async createSamplePost(name: string, user_id?: string): Promise<SamplePost> {
+      const sampleUser = await this.sampleUserRepository.findOne({where: { id: user_id}});
+
+      let samplePost = new SamplePost();
+      samplePost.name = name;
+      if (user_id != undefined) {
+        if (samplePost.users == undefined) {
+          samplePost.users = [sampleUser];
+        } else {
+          samplePost.users.push(sampleUser);
+        }
+      }
+
+      return this.samplePostRepository.save(samplePost);
     }
 
 
-    const saved = await this.userRepository.save(user);
+
+
+  async findAll(query): Promise<UserWithCourses> {
+
+    const courses = await this.courseRepository.find({relations: ['students', 'chapters', 'chapters.tutorials']});
+    let userIds: string[] = [];
+
+    courses.map(c => c.students.map(st => userIds.push(st.id.toString())));
+    const users = await this.userToTutorials.findByIds(userIds, {relations: ['user', 'tutorial']});
+    const zz = await this.userToTutorials.find({where: {userId: In(userIds)}, relations: ['user']});
+
+    const ss = await this.userRepository.find({where: {id: In(userIds)}, relations: ['userToTutorials']});
+    const res: UserWithCourses = {
+      courses: courses,
+      users: ss
+    }
+
+    return res;
+  }
+
+  async addToCourse(user_id: string, course_id: string, is_delete?: boolean): Promise<String> {
+    
+   const user = await this.userRepository.findOne({where: { id: user_id}, relations: ['courses']});
+
+   const course = await this.courseRepository.findOne({where: {id: course_id}, relations: ['students', 'chapters', 'chapters.tutorials']});
+
+   if (course.students == undefined) {
+     course.students = [user];
+   } else if (course.students.length > 0){
+     course.students.push(user);
+   }
+
+   if (is_delete != undefined && is_delete == true) {
+     let students: UserEntity[] = [];
+     course.students.map(st => {
+       if (st.id .toString() != user_id) {
+          students.push(st);
+       }
+     });
+
+     course.students = students;
+   }
+
+   let tutorials: TutorialEntity[] = [];
+   course.chapters.map(ch => {
+     ch.tutorials.map( t => {
+        tutorials.push(t);
+     })
+   })
+
+  console.log("LENGTH", tutorials.length);
+
+
+  if (is_delete != undefined && is_delete == true) {
+    course.chapters.map(ch => {
+      ch.tutorials.map( async t => {
+        const find = await this.userToTutorials.findOne({where: {userId : user_id, tutorialId: t.id}});
+        await this.userToTutorials.remove(find);
+      })
+    })
+  }
+   
+
+   tutorials.map( async t => {
+    const userT = await this.userToTutorials.findOne({where: {userId: user_id, tutorialId: t.id}, relations: ['user', 'tutorial']})
+    if (userT == undefined) {
+      const tt = new UserToTutorials();
+      tt.userId = parseInt(user_id);
+      tt.tutorialId = parseInt(t.id)
+      tt.tutorial = t;
+      tt.user = user;
+      await this.userToTutorials.save(tt);
+    }
+   })
+   
+
+   await this.userRepository.save(user);
+
+
+   await this.courseRepository.save(course);
+   
     return "OK";
   }
 

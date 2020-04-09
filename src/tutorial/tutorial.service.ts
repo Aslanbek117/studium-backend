@@ -8,6 +8,7 @@ import { CreateTutorialDTO } from './dto';
 import { TutorialModule } from './tutorial.module';
 import { getHeapStatistics } from 'v8';
 import { timer } from 'rxjs';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 const slug = require('slug');
 
@@ -20,6 +21,8 @@ export class TutorialService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(TutorialEntity)
     private readonly tutorialRepository: Repository<TutorialEntity>,
+    @InjectRepository(UserToTutorials)
+    private readonly userToTutorialsRepository: Repository<UserToTutorials>
   ) {}
   async findAll(): Promise<TutorialEntity[]> {
 
@@ -58,49 +61,26 @@ export class TutorialService {
     return this.tutorialRepository.save(t);
   }
 
-  async markRead(user_id: string, tutorial_id: string, chapter_id: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({where: {id: user_id}, relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
-    // const tutorial = await this.tutorialRepository.findOne({where: { user: {id: user_id}, id: tutorial_id}});
-    user.courses.map(c => c.chapters.map(ch => ch.tutorials.map(async t => {
-      if (t.id == tutorial_id) {
-        t.isCompleted = true;
-        console.log("set is complete to tutorial_id", tutorial_id );
-        
-      }
-    })))
+  async markRead(user_id: string, tutorial_id: string, chapter_id: string): Promise<String> {
+    const userToTutorials = await this.userToTutorialsRepository.findOne({where: {userId: user_id, tutorialId: tutorial_id}, relations: ['user', 'tutorial']});
+    userToTutorials.isViewed = true;
+    userToTutorials.view_date = new Date();
 
-    user.courses.map(c => c.chapters.map(ch => ch.tutorials.map(t => {
-      console.log("t.id" + t.id + " is " + t.isCompleted)
-    })))
-    // const saved = await this.tutorialRepository.save(tutorial);
-    const chapter = await this.chapterRepository.findOne({where: {id: chapter_id}, relations: ["tutorials"]});
-    let isChapterCompleted = true;
-    console.log("chapter_id", chapter_id);
-    chapter.tutorials.map( t => {
-      if (t.isCompleted == false) {
-        isChapterCompleted = false;
-      }
-    })
-    
-    if (isChapterCompleted) {
-      chapter.isCompleted = true;
-      const savedChapter = await this.chapterRepository.save(chapter);
-    }
+    await this.userToTutorialsRepository.save(userToTutorials);
 
-    const savedUser = await this.userRepository.save(user);
+    console.log("usert", userToTutorials);
 
-
-    return  savedUser;
+    return "ok";
   }
 
   async create(userId: string, chapterName: string, tutorialTitle: string, tutorialBody: string, tutorialInput: string[], tutorialOutput: string[], isLecture: boolean): Promise<TutorialEntity> {
+    const user = await this.userRepository.findOne({where: {id: userId}});
     let tutorial = new TutorialEntity();
     tutorial.title = tutorialTitle;
     tutorial.body = tutorialBody;
     tutorial.input = tutorialInput;
     tutorial.output = tutorialOutput;
     tutorial.isLecture = isLecture;
-    const user = await this.userRepository.findOne({where: {id: userId}});
     tutorial.author = user;
     const chapter = await this.chapterRepository.findOne({where: {title: chapterName}});
     tutorial.chapter = chapter;

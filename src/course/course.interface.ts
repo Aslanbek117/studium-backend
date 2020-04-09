@@ -2,6 +2,7 @@ import { UserData } from '../user/user.interface';
 import { CourseEntity } from './course.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { ChapterEntity } from 'src/chapter/chapter.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 interface Comment {
   body: string;
 }
@@ -75,4 +76,37 @@ export interface CoursesWithStudentsDTO {
   courses: MonitoringCourseEntity[];
   user: NewUserEntity[];
 
+}
+
+
+
+
+
+
+
+export interface CreateSamplePostDTO {
+  name: string;
+  userId?: string;
+}
+
+
+export interface CreateSampleUserDTO {
+  name: string;
+  postId?: string;
+}
+
+
+
+
+
+
+export interface UserWithCourses {
+  courses: CourseEntity[];
+  users: UserEntity[];
+}
+
+
+export interface UserAndTutorial {
+  user: UserEntity;
+  tutorials: UserToTutorials[];
 }

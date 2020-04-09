@@ -54,7 +54,6 @@ export class CourseEntity {
   students: UserEntity[]
 
   @OneToMany(type => ChapterEntity, ch => ch.course, {onDelete: "CASCADE", cascade: true})
-  @JoinColumn()
   chapters: ChapterEntity[];
 
   @Column({nullable: true})

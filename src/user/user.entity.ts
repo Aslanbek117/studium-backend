@@ -1,6 +1,9 @@
 import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, JoinTable, ManyToMany, OneToMany} from "typeorm";
 import * as crypto from 'crypto';
 import { CourseEntity } from '../course/course.entity';
+import { TutorialEntity } from "src/tutorial/tutorial.entity";
+
+import { UserToTutorials } from './user-tutorials.entity';
 
 export enum ROLE {
   ADMIN,
@@ -45,11 +48,11 @@ export class UserEntity {
     this.password = crypto.createHmac('sha256', this.password).digest('hex');
   }
 
-  // @ManyToMany(type => ArticleEntity)
-  // @JoinTable()
-  // favorites: ArticleEntity[];
-
   @ManyToMany(type => CourseEntity, course => course.students, {cascade: true})
   @JoinTable()
   courses: CourseEntity[];
+
+  @OneToMany(type => UserToTutorials, utt => utt.user, {cascade: true})
+  userToTutorials: UserToTutorials[];
+
 }

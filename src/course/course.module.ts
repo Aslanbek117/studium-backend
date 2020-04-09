@@ -7,9 +7,12 @@ import { UserEntity } from '../user/user.entity';
 import { CourseService } from './course.service';
 import { AuthMiddleware } from '../user/auth.middleware';
 import { UserModule } from '../user/user.module';
+import { SamplePost } from './SamplePost.entity';
+import { SampleUser } from './SampleUser.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CourseEntity, Comment, UserEntity]), UserModule],
+  imports: [TypeOrmModule.forFeature([CourseEntity, Comment, UserEntity, SamplePost, SampleUser, UserToTutorials]), UserModule],
   providers: [CourseService],
   controllers: [
     CourseController
