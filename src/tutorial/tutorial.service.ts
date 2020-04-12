@@ -74,14 +74,14 @@ export class TutorialService {
   }
 
   async create(userId: string, chapterName: string, tutorialTitle: string, tutorialBody: string, tutorialInput: string[], tutorialOutput: string[], isLecture: boolean): Promise<TutorialEntity> {
-    const user = await this.userRepository.findOne({where: {id: userId}});
+    
     let tutorial = new TutorialEntity();
     tutorial.title = tutorialTitle;
     tutorial.body = tutorialBody;
     tutorial.input = tutorialInput;
     tutorial.output = tutorialOutput;
     tutorial.isLecture = isLecture;
-    tutorial.author = user;
+    tutorial.author = null;
     const chapter = await this.chapterRepository.findOne({where: {title: chapterName}});
     tutorial.chapter = chapter;
     const savedTutorial = this.tutorialRepository.save(tutorial);

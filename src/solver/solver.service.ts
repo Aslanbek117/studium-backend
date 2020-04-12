@@ -1,12 +1,14 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getRepository, DeleteResult, In } from 'typeorm';
-import { SolverEntity } from './solver.entity';
+import { SolverEntity, JDoodleResponse, FrontResponseDTO } from './solver.entity';
 import { CreateSolverDTO, ResponseDTO } from './dto';
 import { CourseEntity } from '../course/course.entity';
 import { create } from 'domain';
 import { TutorialEntity } from '../tutorial/tutorial.entity';
 import { UserEntity } from '../user/user.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
+import { timer } from 'rxjs';
 
 var fs = require('fs');
 
@@ -19,26 +21,28 @@ const DOODLE_URL = "https://api.jdoodle.com/v1/execute";
 export class SolverService {
   constructor(
     @InjectRepository(SolverEntity)
-    private readonly  solverRepo: Repository<SolverEntity>,
+    private readonly solverRepo: Repository<SolverEntity>,
     @InjectRepository(CourseEntity)
     private readonly courseRepo: Repository<CourseEntity>,
     @InjectRepository(TutorialEntity)
     private readonly tutorialRepo: Repository<TutorialEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(UserToTutorials)
+    private readonly userToTutorialsRepository: Repository<UserToTutorials>,
     private httpService: HttpService
-  ) {}
+  ) { }
 
   async findAll(body: CreateSolverDTO): Promise<SolverEntity> {
-    const user = await this.userRepo.findOne({where: { id: body.userId}});
-    const tutorial = await this.tutorialRepo.findOne({where: { id: body.tutorialId}})
+    const user = await this.userRepo.findOne({ where: { id: body.userId } });
+    const tutorial = await this.tutorialRepo.findOne({ where: { id: body.tutorialId } })
     const fileName: string = user.email + "-" + tutorial.id + ".c";
     fs.writeFile(
-      __dirname +"/" +fileName,
-       body.userCode
-    , function (err) {
-      if (err) throw err;
-    });
+      __dirname + "/" + fileName,
+      body.userCode
+      , function (err) {
+        if (err) throw err;
+      });
     console.log("fileName", fileName)
 
     console.log("to exec", __dirname + fileName);
@@ -47,7 +51,7 @@ export class SolverService {
 
     return {} as any;
   }
-  
+
 
   // async compile_run(user_id: string, tutorial_id: string, fileName: string, input: string[], output: string[]): Promise<SolverEntity> {
 
@@ -110,65 +114,82 @@ export class SolverService {
 
 
 
-  async doodle(body: CreateSolverDTO): Promise<ResponseDTO> {
+  async doodle(body: CreateSolverDTO): Promise<FrontResponseDTO> {
 
-    const tutorial = await this.tutorialRepo.findOne({where: { id: body.tutorialId}});
-    const user = await this.userRepo.findOne({where: {id: body.userId}});
+    const tutorial = await this.tutorialRepo.findOne({ where: { id: body.tutorialId } });
 
+    const user = await this.userRepo.findOne({ where: { id: body.userId } });
+
+    const ust = await this.userToTutorialsRepository.findOne({ where: { userId: body.userId, tutorialId: body.tutorialId } });
+    let isCompleted = true;
     let decisions: SolverEntity[] = [];
 
-      tutorial.input.map( (input, index) => {
-          let decision: SolverEntity = new SolverEntity();
-          const payload = 
-            {
-              "script": body.userCode,
-              "language": "cpp",
-              "versionIndex": "0",
-              "clientId": "b6f883558bfa91616ea62e0a8d3824c1",
-              "clientSecret": "658834d2af24e10b7c946058bdb2495cb64d414e3b83307b59e7406ef2dc03ac",
-              "stdin": input
-            };
-            
-          const resp = this.httpService.post(DOODLE_URL, payload).subscribe( (response) => {
-            decision.author = user;
-            decision.cpuTime = response.data.cpuTime;
-            decision.memory = response.data.memory;
-            decision.input = input;
-            
-            decision.output = response.data.output;
-            if (response.data.output == tutorial.output[index]) {
-              decision.decision = "ACCEPTED";
-            } else {
-              decision.decision = "WRONG ANSWER";
-            }
+    let i = 0;
 
-            const savedDecision = 
-            
-            decisions.push(decision);
-            console.log("response", response.data);
-            console.log("decision", decision);
-        })
-      })
+    for (i = 0; i< tutorial.input.length; i++) {
+      let decision: SolverEntity = new SolverEntity();
+      const resp = await this.sendToDoodle(body.userCode, "cpp" ,tutorial.input[i], tutorial.output[i]);
+      if (resp.output == tutorial.output[i]) {
+        isCompleted = true;
+      } else {isCompleted = false};
 
-    let isCompleted  = true;
-    decisions.map( d => {
-      if (d.decision != "ACCEPTED") {
-        isCompleted = false;
-      }
-    })
+      decision.input = tutorial.input[i];
+      decision.output = resp.output;
+      decision.decision = isCompleted ? "ПРИНЯТО" : "ОШИБКА"
+      decision.memory = resp.memory 
+      decision.cpuTime  = resp.cpuTime
+      decision.code = body.userCode;
+      decision.tutorial = tutorial.id;
+      decision.user = user.id.toString();
+      decision.ust = ust;
+      decisions.push(decision);
+      
+    }
+
+    let j = 0;
+
+    for (j = 0; j< decisions.length; j++) {
+      await this.solverRepo.save(decisions[j]);
+    }
+
+    
+    ust.isCompleted = isCompleted;
+    ust.code = body.userCode;
+
+    await this.userToTutorialsRepository.save(ust);
 
 
-    decisions.map( d => {
-      console.log(d);
-    })
+
+    const items = await this.solverRepo.find({where: {id:  user.id}});
 
 
-    let response: ResponseDTO = {
-      decision: isCompleted ? "ACCEPTED" : "WRONG ANSWER",
-      tutorialId: body.tutorialId
+    let response: FrontResponseDTO = {
+      decisions: items
     };
 
     return response;
   }
- 
+
+
+
+  async sendToDoodle(script: string, language: string, stdin: string, output: string): Promise<JDoodleResponse> {
+    const payload =
+      {
+        "script": script,
+        "language": "cpp",
+        "versionIndex": "0",
+        "clientId": "b6f883558bfa91616ea62e0a8d3824c1",
+        "clientSecret": "658834d2af24e10b7c946058bdb2495cb64d414e3b83307b59e7406ef2dc03ac",
+        "stdin": stdin
+      };
+    let decisions: SolverEntity[] = [];
+    const response = await this.httpService.post(DOODLE_URL, payload).toPromise();
+      console.log("e", response.data);
+    const data: JDoodleResponse = response.data;
+  
+    
+    return data;
+    
+  }
+
 }

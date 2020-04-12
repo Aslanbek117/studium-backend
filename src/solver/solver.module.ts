@@ -8,10 +8,11 @@ import { SolverEntity } from './solver.entity';
 import { SolverService } from './solver.service'
 import { CourseEntity } from '../course/course.entity';
 import { TutorialEntity } from '../tutorial/tutorial.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SolverEntity, UserEntity, CourseEntity, TutorialEntity, UserEntity]), UserModule, HttpModule],
+  imports: [TypeOrmModule.forFeature([SolverEntity, UserEntity, CourseEntity, TutorialEntity, UserEntity, UserToTutorials]), UserModule, HttpModule],
   providers: [SolverService],
   controllers: [
     SolverController

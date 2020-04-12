@@ -18,6 +18,14 @@ export class UserService {
   ) {}
 
   async findAll(): Promise<UserEntity[]> {
+
+    
+
+
+
+
+
+
     return await this.userRepository.find();
   }
 
@@ -30,6 +38,16 @@ export class UserService {
     console.log(findOneOptions);
 
     return await this.userRepository.findOne(findOneOptions, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
+  }
+
+
+  async deleteUesr(user_id: string): Promise<String> {
+
+    const user = await this.userRepository.findOne({where: {id: user_id},relations:['userToTutorials']});
+
+    await this.userRepository.remove(user);
+
+    return "ok";
   }
 
   async create(dto: CreateUserDto): Promise<UserRO> {
@@ -94,7 +112,7 @@ export class UserService {
   }
 
   async findByEmail({email}): Promise<UserEntity>{
-    const user = await this.userRepository.findOne({where: { email: email}, relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials', "userToTutorials", "userToTutorials.user", "userToTutorials.tutorial"]});
+    const user = await this.userRepository.findOne({where: { email: email}, relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials', "userToTutorials", "userToTutorials.user", "userToTutorials.tutorial", "userToTutorials.decisions"]});
     return user;
   }
 

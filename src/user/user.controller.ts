@@ -50,6 +50,12 @@ export class UserController {
     return this.userService.create(userData);
   }
 
+  @Post('delete')
+  async remove(@Body('user_id') user_id: string) {
+    console.log("delete user", user_id);
+    return this.userService.deleteUesr(user_id);
+  }
+
   @Post('sudo')
   async grant(@Body('email') userEmail: string, @Body("role") role: string) {
     return await this.userService.sudo(userEmail, role);

@@ -1,9 +1,10 @@
-import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, JoinTable, ManyToMany, OneToMany} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, JoinTable, ManyToMany, OneToMany, ManyToOne} from "typeorm";
 import * as crypto from 'crypto';
 import { CourseEntity } from '../course/course.entity';
 import { TutorialEntity } from "src/tutorial/tutorial.entity";
 
 import { UserToTutorials } from './user-tutorials.entity';
+import { SolverEntity } from "src/solver/solver.entity";
 
 export enum ROLE {
   ADMIN,
@@ -43,6 +44,9 @@ export class UserEntity {
   @Column()
   password: string;
 
+  @OneToMany(type => SolverEntity, s => s.ust)
+  decisions: SolverEntity[];
+
   @BeforeInsert()
   hashPassword() {
     this.password = crypto.createHmac('sha256', this.password).digest('hex');
@@ -52,7 +56,7 @@ export class UserEntity {
   @JoinTable()
   courses: CourseEntity[];
 
-  @OneToMany(type => UserToTutorials, utt => utt.user, {cascade: true})
+  @OneToMany(type => UserToTutorials, utt => utt.user, {cascade: true, onDelete: "CASCADE"})
   userToTutorials: UserToTutorials[];
 
 }

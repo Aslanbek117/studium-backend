@@ -1,6 +1,7 @@
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { UserEntity } from "./user.entity";
 import { TutorialEntity } from "../tutorial/tutorial.entity";
+import { SolverEntity } from "src/solver/solver.entity";
 
 @Entity()
 export class UserToTutorials {
@@ -31,6 +32,9 @@ export class UserToTutorials {
     @Column({default: false})
     isCompleted: boolean;
 
+    @OneToMany(type => SolverEntity, s => s.ust)
+     decisions: SolverEntity[];
+
     @Column({type: 'timestamp', nullable: true})
     complete_date: Date
     
@@ -40,9 +44,9 @@ export class UserToTutorials {
     @Column({type: 'timestamp', nullable: true})
     view_date: Date;
 
-    @ManyToOne(type => UserEntity, user => user.userToTutorials)
+    @ManyToOne(type => UserEntity, user => user.userToTutorials, {onDelete: 'CASCADE'})
     public user!: UserEntity;
 
-    @ManyToOne(type => TutorialEntity, tutorial => tutorial.userToTutorials)
+    @ManyToOne(type => TutorialEntity, tutorial => tutorial.userToTutorials, {onDelete: 'CASCADE'})
     public tutorial!: TutorialEntity;
 }

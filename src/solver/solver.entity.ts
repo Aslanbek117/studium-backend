@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany, JoinColumn, AfterUpdate, BeforeUpdate } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
+import { TutorialEntity } from 'src/tutorial/tutorial.entity';
+import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 @Entity('decision')
 export class SolverEntity {
@@ -8,7 +10,14 @@ export class SolverEntity {
   id: string;
 
   @Column({nullable: true})
-  tutorial_id: string;
+  tutorial: string;
+
+  @Column({ nullable: true})
+  user: string;
+
+
+  @Column({nullable: true})
+  code: string;
 
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   created: Date;
@@ -36,7 +45,21 @@ export class SolverEntity {
   @Column({nullable: true})
   cpuTime: string;
 
-  @ManyToOne(type => UserEntity, user => user.courses)
-  author: UserEntity;
+  @ManyToOne(type => UserToTutorials, a => a.decisions)
+  ust: UserToTutorials;
 
+}
+
+
+
+export interface JDoodleResponse {
+  output: string;
+  memory: string;
+  cpuTime: string;
+}
+
+
+
+export interface FrontResponseDTO {
+  decisions: SolverEntity[];
 }

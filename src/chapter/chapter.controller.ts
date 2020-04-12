@@ -24,8 +24,9 @@ export class ChapterController {
 
 
   @Post('create')
-  async create(@Body('userId') userId: string, @Body('articleName') articleName: string, @Body('chapter') chapterData: CreateChapterDTO) {
+  async create(@Body('userId') userId: string, @Body('courseName') articleName: string, @Body('chapter') chapterData: CreateChapterDTO) {
     console.log("create chapter", chapterData.title);
+    console.log("userId", userId);
     return this.chapterService.create(userId, articleName, chapterData.title, chapterData.body);
   }
 

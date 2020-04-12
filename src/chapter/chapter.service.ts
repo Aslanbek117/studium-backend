@@ -60,8 +60,8 @@ export class ChapterService {
     let chapter = new ChapterEntity();
     chapter.title = chapterTitle;
     chapter.body = chapterBody;
-    const user = await this.userRepository.findOne({where: {id: userId}});
-    chapter.author = user;
+    // const user = await this.userRepository.findOne({where: {id: userId}});
+    chapter.author = null;
     const course = await this.courseRepository.findOne({where: {title: courseName}});
     chapter.course = course;
     const savedChapter = this.chapterRepository.save(chapter);

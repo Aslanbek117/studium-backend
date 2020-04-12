@@ -110,12 +110,12 @@ export class CourseService {
 
     const courses = await this.courseRepository.find({relations: ['students', 'chapters', 'chapters.tutorials']});
     let userIds: string[] = [];
-
+    console.log("courses", courses.map(c => console.log("stu", c.students)));
     courses.map(c => c.students.map(st => userIds.push(st.id.toString())));
-    const users = await this.userToTutorials.findByIds(userIds, {relations: ['user', 'tutorial']});
-    const zz = await this.userToTutorials.find({where: {userId: In(userIds)}, relations: ['user']});
+    // const users = await this.userToTutorials.findByIds(userIds, {relations: ['user', 'tutorial']});
+    // const zz = await this.userToTutorials.find({where: {userId: In(userIds)}, relations: ['user']});
 
-    const ss = await this.userRepository.find({where: {id: In(userIds)}, relations: ['userToTutorials']});
+    const ss = await this.userRepository.find({where: {id: In(userIds)}, relations: ['userToTutorials','userToTutorials.decisions' ]});
     const res: UserWithCourses = {
       courses: courses,
       users: ss
@@ -124,17 +124,21 @@ export class CourseService {
     return res;
   }
 
-  async addToCourse(user_id: string, course_id: string, is_delete?: boolean): Promise<String> {
-    
+  async addToCourse(user_id: string, course_id: string, is_delete?: boolean): Promise<CourseEntity> {
+    console.log("ADDING")
    const user = await this.userRepository.findOne({where: { id: user_id}, relations: ['courses']});
 
    const course = await this.courseRepository.findOne({where: {id: course_id}, relations: ['students', 'chapters', 'chapters.tutorials']});
 
-   if (course.students == undefined) {
+   if (course.students == undefined) {     
      course.students = [user];
-   } else if (course.students.length > 0){
+   } else if (course.students.length >= 0){
      course.students.push(user);
    }
+   console.log(course);
+
+
+   console.log("course students", course.students);
 
    if (is_delete != undefined && is_delete == true) {
      let students: UserEntity[] = [];
@@ -183,9 +187,10 @@ export class CourseService {
    await this.userRepository.save(user);
 
 
-   await this.courseRepository.save(course);
+   const result = await this.courseRepository.save(course);
+   const find = await this.courseRepository.findOne({where: {id: result.id}, relations: ['chapters', 'chapters.tutorials', 'students', 'students.courses', 'students.courses.chapters', 'students.courses.chapters.tutorials']})
    
-    return "OK";
+    return result;
   }
 
 
