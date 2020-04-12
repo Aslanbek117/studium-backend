@@ -10,10 +10,10 @@ export class SolverEntity {
   id: string;
 
   @Column({nullable: true})
-  tutorial: string;
+  tutorialId: string;
 
   @Column({ nullable: true})
-  user: string;
+  userId: string;
 
 
   @Column({nullable: true})
@@ -32,6 +32,9 @@ export class SolverEntity {
 
   @Column({nullable: true})
   input: string;
+
+  @Column({nullable: true})
+  exptectedOutput: string;
 
   @Column({nullable: true})
   output: string;

@@ -137,10 +137,11 @@ export class SolverService {
       decision.output = resp.output;
       decision.decision = isCompleted ? "ПРИНЯТО" : "ОШИБКА"
       decision.memory = resp.memory 
+      decision.exptectedOutput = tutorial.output[i];
       decision.cpuTime  = resp.cpuTime
       decision.code = body.userCode;
-      decision.tutorial = tutorial.id;
-      decision.user = user.id.toString();
+      decision.tutorialId = tutorial.id;
+      decision.userId = user.id.toString();
       decision.ust = ust;
       decisions.push(decision);
       
