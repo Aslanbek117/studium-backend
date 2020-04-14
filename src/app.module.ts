@@ -15,7 +15,7 @@ const join = require("path");
     host: "ec2-54-75-231-215.eu-west-1.compute.amazonaws.com",
     // host:"localhost",
     port: 5432,
-    username: "mkdwfqcqvc,jijs",
+    username: "mkdwfqcqvcjijs",
     // username: "aslan",
     password: "3ff4992b4a14e1ef87314f44c13157fc1539170e04738a85929cb22c2de27c12",
     // password:"",
