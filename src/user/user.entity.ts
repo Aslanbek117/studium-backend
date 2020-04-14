@@ -41,11 +41,10 @@ export class UserEntity {
   @Column({default: ''})
   image: string;
 
-  @Column()
+  @Column({select: false})
   password: string;
 
-  @OneToMany(type => SolverEntity, s => s.ust)
-  decisions: SolverEntity[];
+  
 
   @BeforeInsert()
   hashPassword() {

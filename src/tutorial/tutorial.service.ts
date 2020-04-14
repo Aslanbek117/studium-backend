@@ -35,7 +35,6 @@ export class TutorialService {
   }
 
   async addTutorialToChapter(aId: string, tId: string): Promise<TutorialEntity> {
-    console.log("Adding");
     const chapter = await this.chapterRepository.findOne({where: {id: aId}, relations: ['tutorials']});
     const tutorial = await this.tutorialRepository.findOne({where: {id: tId}, relations: ['chapter']});
     chapter.tutorials = [tutorial];
@@ -48,9 +47,10 @@ export class TutorialService {
     return this.tutorialRepository.find({where: {chapter: {id: chapterId}}, relations: ['chapter']})
   }
 
-  async updateDescription(description: string, tId: string): Promise<TutorialEntity> {
+  async updateDescription(description: string, tId: string, exampleCode: string): Promise<TutorialEntity> {
     const t = await this.tutorialRepository.findOne({where: { id: tId}});
     t.body = description;
+    t.exampleCode = exampleCode;
     return this.tutorialRepository.save(t);
   }
 
@@ -68,12 +68,10 @@ export class TutorialService {
 
     await this.userToTutorialsRepository.save(userToTutorials);
 
-    console.log("usert", userToTutorials);
-
     return "ok";
   }
 
-  async create(userId: string, chapterName: string, tutorialTitle: string, tutorialBody: string, tutorialInput: string[], tutorialOutput: string[], isLecture: boolean): Promise<TutorialEntity> {
+  async create(userId: string, chapterName: string, tutorialTitle: string, tutorialBody: string, tutorialInput: any[], tutorialOutput: any[], isLecture: boolean, exampleCode: string): Promise<TutorialEntity> {
     
     let tutorial = new TutorialEntity();
     tutorial.title = tutorialTitle;
@@ -81,6 +79,7 @@ export class TutorialService {
     tutorial.input = tutorialInput;
     tutorial.output = tutorialOutput;
     tutorial.isLecture = isLecture;
+    tutorial.exampleCode = exampleCode;
     tutorial.author = null;
     const chapter = await this.chapterRepository.findOne({where: {title: chapterName}});
     tutorial.chapter = chapter;

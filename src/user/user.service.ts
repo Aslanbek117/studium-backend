@@ -35,7 +35,6 @@ export class UserService {
       email: loginUserDto.email,
       password: crypto.createHmac('sha256', loginUserDto.password).digest('hex'),
     };
-    console.log(findOneOptions);
 
     return await this.userRepository.findOne(findOneOptions, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
   }
@@ -91,9 +90,7 @@ export class UserService {
   }
 
   async sudo(userEmail: string, role: string): Promise<UserEntity> {
-    console.log("email", userEmail);
     let user = await this.userRepository.findOne({where: { email: userEmail}});
-    console.log("user", user);
     user.role = role;
     const savedUser = this.userRepository.save(user);
     return savedUser;

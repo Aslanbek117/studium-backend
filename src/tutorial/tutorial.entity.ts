@@ -23,6 +23,9 @@ export class TutorialEntity {
   @Column({default: false})
   isCompleted: boolean;
 
+  @Column({nullable: true})
+  exampleCode: string;
+
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   created: Date;
 

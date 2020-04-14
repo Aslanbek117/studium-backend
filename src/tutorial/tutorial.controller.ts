@@ -14,8 +14,7 @@ export class TutorialController {
 
   @Get('/tutorials/all')
   async findAll(): Promise<TutorialEntity[]> {
-    console.log("DADSA");
-    return await this.tutorialService.findAll();
+     return await this.tutorialService.findAll();
   }
 
   @Get(':title')
@@ -26,8 +25,7 @@ export class TutorialController {
 
   @Post('create')
   async create(@Body('userId') userId: string, @Body('chapterName') chapterName: string, @Body('tutorial') tutorialData: CreateTutorialDTO) {
-    console.log("create tutorial", tutorialData.title);
-    return this.tutorialService.create(userId, chapterName, tutorialData.title, tutorialData.body, tutorialData.input, tutorialData.output, tutorialData.isLecture);
+    return this.tutorialService.create(userId, chapterName, tutorialData.title, tutorialData.body, tutorialData.input, tutorialData.output, tutorialData.isLecture, tutorialData.exampleCode);
   }
 
   @Post('completed')
@@ -45,9 +43,8 @@ export class TutorialController {
 
 
   @Post('update')
-  async update(@Body('tutorialId') tutorialId: string, @Body('description') description: string) {
-    console.log("iupdate desc", tutorialId, description);
-    return this.tutorialService.updateDescription(description, tutorialId);
+  async update(@Body('tutorialId') tutorialId: string, @Body('description') description: string, @Body('exampleCode') exampleCode: string) {
+    return this.tutorialService.updateDescription(description, tutorialId, exampleCode);
   }
 
   @Post('addToCourse')
@@ -58,7 +55,6 @@ export class TutorialController {
   
   @Post('io')
   async addOI(@Body('tutorialId') tutorialId: string, @Body('input') input: string[], @Body('output') output: string[]) {
-    console.log("iupdate desc", tutorialId, input, output);
     return this.tutorialService.addIO(input, output, tutorialId);
   }
 

@@ -13,7 +13,6 @@ export class UserController {
 
   @Get(':email')
   async findMe(@Param() email): Promise<UserEntity> {
-    console.log("find by email");
     return await this.userService.findByEmail(email);
   }
 
@@ -46,13 +45,11 @@ export class UserController {
 
   @Post('create')
   async create(@Body('user') userData: CreateUserDto) {
-    console.log("DAD", userData);
     return this.userService.create(userData);
   }
 
   @Post('delete')
   async remove(@Body('user_id') user_id: string) {
-    console.log("delete user", user_id);
     return this.userService.deleteUesr(user_id);
   }
 
@@ -64,7 +61,6 @@ export class UserController {
   @Post('login')
   async login(@Body('user') loginUserDto: LoginUserDto): Promise<UserRO> {
     const _user = await this.userService.findOne(loginUserDto);
-    console.log("ITS WORKING")
     const errors = {User: ' not found'};
     if (!_user) throw new HttpException({errors}, 401);
 

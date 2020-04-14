@@ -43,9 +43,7 @@ export class SolverService {
       , function (err) {
         if (err) throw err;
       });
-    console.log("fileName", fileName)
 
-    console.log("to exec", __dirname + fileName);
     // const compile_result = await this.compile_run(body.userId, body.tutorialId,  fileName, tutorial.input, tutorial.output);
     // return compile_result;
 
@@ -112,6 +110,37 @@ export class SolverService {
   // }
 
 
+  async createComment(user_id: string, tutorial_id: string, mentor_id: string, comment: string, createdAt: string) {
+    const item = await this.solverRepo.find({where: {userId: user_id, tutorialId: tutorial_id}});
+    const found = item.find(i => {
+      let date = i.created.toISOString().toString().split("T")[0];
+        let date1 = i.created.toISOString().toString().split("T")[1].split(".")[0];
+        const result = date + " " + date1;
+        console.log("result", result)
+        if (result == createdAt) {
+          return i;
+        }
+    })
+    found.mentorComment = comment;
+    found.mentorId = mentor_id;
+    return await this.solverRepo.save(found);
+  }
+
+  async createTeacherComment(user_id: string, tutorial_id: string, teacher_id: string, comment: string, createdAt: string) {
+    const item = await this.solverRepo.find({where: {userId: user_id, tutorialId: tutorial_id}});
+    const found = item.find(i => {
+      let date = i.created.toISOString().toString().split("T")[0];
+        let date1 = i.created.toISOString().toString().split("T")[1].split(".")[0];
+        const result = date + " " + date1;
+        if (result == createdAt) {
+          return i;
+        }
+    })
+    found.teacherComment = comment;
+    found.teacherId = teacher_id;
+    return await this.solverRepo.save(found);
+  }
+
 
 
   async doodle(body: CreateSolverDTO): Promise<FrontResponseDTO> {
@@ -125,19 +154,26 @@ export class SolverService {
     let decisions: SolverEntity[] = [];
 
     let i = 0;
-
+    if (tutorial.input == undefined ||  tutorial.input.length == 0) {
+      tutorial.input = ['test'];
+      tutorial.output = ['test'];
+    }
+    let decision: SolverEntity = new SolverEntity();
+    decision.input = [];
+    decision.output = [];
+    decision.expectedOutput = [];
     for (i = 0; i< tutorial.input.length; i++) {
-      let decision: SolverEntity = new SolverEntity();
-      const resp = await this.sendToDoodle(body.userCode, "cpp" ,tutorial.input[i], tutorial.output[i]);
-      if (resp.output == tutorial.output[i]) {
+      
+      const resp = await this.sendToDoodle(body.userCode, "java" ,tutorial.input[i], tutorial.output[i]);
+      if (resp.output.toString().replace(/[\n\t\r]/g,"") == tutorial.output[i].toString().replace(/[\n\t\r]/g,"")) {
         isCompleted = true;
       } else {isCompleted = false};
 
-      decision.input = tutorial.input[i];
-      decision.output = resp.output;
-      decision.decision = isCompleted ? "ПРИНЯТО" : "ОШИБКА"
+      decision.input.push(tutorial.input[i]);
+      decision.output.push(resp.output);
+      decision.decision = isCompleted ? "ПРИНЯТО" : "Неправильный ответ"
       decision.memory = resp.memory 
-      decision.exptectedOutput = tutorial.output[i];
+      decision.expectedOutput.push(tutorial.output[i])
       decision.cpuTime  = resp.cpuTime
       decision.code = body.userCode;
       decision.tutorialId = tutorial.id;
@@ -155,6 +191,7 @@ export class SolverService {
 
     
     ust.isCompleted = isCompleted;
+    ust.isViewed = true;
     ust.code = body.userCode;
 
     await this.userToTutorialsRepository.save(ust);
@@ -177,7 +214,7 @@ export class SolverService {
     const payload =
       {
         "script": script,
-        "language": "cpp",
+        "language": "java",
         "versionIndex": "0",
         "clientId": "b6f883558bfa91616ea62e0a8d3824c1",
         "clientSecret": "658834d2af24e10b7c946058bdb2495cb64d414e3b83307b59e7406ef2dc03ac",
@@ -185,8 +222,8 @@ export class SolverService {
       };
     let decisions: SolverEntity[] = [];
     const response = await this.httpService.post(DOODLE_URL, payload).toPromise();
-      console.log("e", response.data);
     const data: JDoodleResponse = response.data;
+    console.log("output", data.output);
   
     
     return data;

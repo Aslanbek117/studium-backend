@@ -17,6 +17,18 @@ export class SolverEntity {
 
 
   @Column({nullable: true})
+  mentorComment: string;
+
+  @Column({nullable: true})
+  mentorId: string;
+
+  @Column({nullable: true})
+  teacherId: string;
+
+  @Column({nullable: true})
+  teacherComment: string;
+
+  @Column({nullable: true})
   code: string;
 
   @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
@@ -30,14 +42,14 @@ export class SolverEntity {
     this.updated = new Date;
   }
 
-  @Column({nullable: true})
-  input: string;
+  @Column('simple-array', {nullable: true})
+  input: any[];
 
-  @Column({nullable: true})
-  exptectedOutput: string;
+  @Column('simple-array', {nullable: true})
+  expectedOutput: any[];
 
-  @Column({nullable: true})
-  output: string;
+  @Column('simple-array', {nullable: true})
+  output: any[];
 
   @Column({nullable: true})
   decision: string;
