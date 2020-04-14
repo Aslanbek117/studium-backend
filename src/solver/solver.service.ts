@@ -116,7 +116,6 @@ export class SolverService {
       let date = i.created.toISOString().toString().split("T")[0];
         let date1 = i.created.toISOString().toString().split("T")[1].split(".")[0];
         const result = date + " " + date1;
-        console.log("result", result)
         if (result == createdAt) {
           return i;
         }
@@ -223,7 +222,6 @@ export class SolverService {
     let decisions: SolverEntity[] = [];
     const response = await this.httpService.post(DOODLE_URL, payload).toPromise();
     const data: JDoodleResponse = response.data;
-    console.log("output", data.output);
   
     
     return data;

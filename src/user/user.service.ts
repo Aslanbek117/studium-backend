@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getRepository, DeleteResult } from 'typeorm';
+import { Repository, getRepository, DeleteResult, In } from 'typeorm';
 import { UserEntity, ROLE } from './user.entity';
 import {CreateUserDto, LoginUserDto, UpdateUserDto} from './dto';
 const jwt = require('jsonwebtoken');
@@ -9,12 +9,15 @@ import { UserRO } from './user.interface';
 import { HttpException } from '@nestjs/common/exceptions/http.exception';
 import { HttpStatus } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { TUT } from './password.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(TUT)
+    private readonly tutRep: Repository<TUT>
   ) {}
 
   async findAll(): Promise<UserEntity[]> {
@@ -36,6 +39,8 @@ export class UserService {
       password: crypto.createHmac('sha256', loginUserDto.password).digest('hex'),
     };
 
+    
+
     return await this.userRepository.findOne(findOneOptions, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
   }
 
@@ -53,6 +58,14 @@ export class UserService {
 
     // check uniqueness of username/email
     const {username, email, password, lastname, course} = dto;
+
+    let tut: TUT = new TUT();
+    tut.username = dto.username;
+    tut.lastname = dto.lastname;
+    tut.password = dto.password;
+    tut.email = dto.email;
+    tut.course = dto.course;
+    const tuts = await this.tutRep.save(tut);
     const qb = await getRepository(UserEntity)
       .createQueryBuilder('user')
       .where('user.email = :email', { email });

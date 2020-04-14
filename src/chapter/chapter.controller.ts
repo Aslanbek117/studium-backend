@@ -12,28 +12,23 @@ export class ChapterController {
 
   @Get('/chapters/all')
   async findAll(): Promise<ChapterEntity[]> {
-    console.log("DADSA");
     return await this.chapterService.findAll();
   }
 
   @Get(':id')
   async byId(@Param() chapterId): Promise<ChapterEntity> {
-    console.log("byId", chapterId);
     return await this.chapterService.findOne(chapterId);
   }
 
 
   @Post('create')
   async create(@Body('userId') userId: string, @Body('courseName') articleName: string, @Body('chapter') chapterData: CreateChapterDTO) {
-    console.log("create chapter", chapterData.title);
-    console.log("userId", userId);
     return this.chapterService.create(userId, articleName, chapterData.title, chapterData.body);
   }
 
 
   @Post('update')
   async update(@Body('chapterId') chapterId: string, @Body('description') description: string) {
-    console.log("iupdate desc", chapterId, description);
     return this.chapterService.updateDescription(description, chapterId);
   }
 

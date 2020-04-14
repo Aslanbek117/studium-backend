@@ -137,7 +137,6 @@ export class CourseService {
   }
 
   async addToCourse(user_id: string, course_id: string, is_delete?: boolean): Promise<CourseEntity> {
-    console.log("ADDING")
    const user = await this.userRepository.findOne({where: { id: user_id}, relations: ['courses']});
 
    const course = await this.courseRepository.findOne({where: {id: course_id}, relations: ['students', 'chapters', 'chapters.tutorials']});
@@ -147,10 +146,8 @@ export class CourseService {
    } else if (course.students.length >= 0){
      course.students.push(user);
    }
-   console.log(course);
 
 
-   console.log("course students", course.students);
 
    if (is_delete != undefined && is_delete == true) {
      let students: UserEntity[] = [];
@@ -170,7 +167,6 @@ export class CourseService {
      })
    })
 
-  console.log("LENGTH", tutorials.length);
 
 
   if (is_delete != undefined && is_delete == true) {

@@ -51,13 +51,12 @@ export class CourseController {
 
   @Get('/id/:id')
   async findBYId(@Param() id): Promise<CourseRO> {
-    console.log("Id")
+    ("Id")
     return await this.courseService.findById(id);
   }
 
   @Get('/title/:title')
   async findOne(@Param() title): Promise<CourseRO> {
-    console.log("SLUGG", title);
     return await this.courseService.findOne(title);
   }
 
@@ -70,7 +69,6 @@ export class CourseController {
 
   @Post('/course/enroll')
   async enroll(@Body('user_id') user_id: string, @Body('course_id') course_id: string, @Body("is_delete") is_delete: boolean): Promise<CourseEntity> {
-    console.log("ENROLL");
     const user = await this.courseService.addToCourse(user_id, course_id, is_delete);
     return user;
   }
@@ -78,7 +76,6 @@ export class CourseController {
 
   @Post("create")
   async create(@Body('course') courseData: CreateCourseDto) {
-    console.log("create course");
     return this.courseService.create(courseData);
   }
 

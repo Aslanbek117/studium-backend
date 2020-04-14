@@ -25,13 +25,11 @@ export class ChapterService {
   }
 
   async findOne({tId}): Promise<ChapterEntity> {
-    console.log("chapterId", tId);
     const chapter = this.chapterRepository.findOne({where: {id: tId}, relations: ['course', 'tutorials']});
     return chapter;
   }
 
   async addChapterToCourse(courseId: string, chapterId: string): Promise<ChapterEntity> {
-    console.log("Adding");
     const course = await this.courseRepository.findOne({where: {id: courseId}, relations: ['chapters']});
     const chapter = await this.chapterRepository.findOne({where: {id: chapterId}, relations: ['course', 'tutorials']});
     // article.chapters = [chapter];
