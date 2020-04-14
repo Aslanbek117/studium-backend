@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, HttpModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,6 +8,7 @@ import { SolverModule } from './solver/solver.module';
 import { ChapterModule } from './chapter/chapter.module';
 import { TutorialModule } from './tutorial/tutorial.module';
 const join = require("path");
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [    TypeOrmModule.forRoot({
@@ -24,6 +25,8 @@ const join = require("path");
     entities: [join.join(__dirname, '**', `*.entity.{ts,js}`)],
     synchronize: true
   }),
+  ScheduleModule.forRoot(),
+  HttpModule,
   CourseModule,
     UserModule,
     SolverModule,
