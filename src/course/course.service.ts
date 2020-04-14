@@ -110,8 +110,20 @@ export class CourseService {
 
     const courses = await this.courseRepository.find({relations: ['students', 'chapters', 'chapters.tutorials']});
     let userIds: string[] = [];
-    console.log("courses", courses.map(c => console.log("stu", c.students)));
     courses.map(c => c.students.map(st => userIds.push(st.id.toString())));
+    let chapterCount = 0;
+    let tutorialCount = 0;
+    courses.map(c => {
+       chapterCount += c.chapters.length;
+      
+      c.chapters.map(ch => {
+        tutorialCount += ch.tutorials.length;
+      })
+    })
+    courses.map(c => {
+      c.chapterCount = chapterCount.toString();
+      c.tutorialCount = tutorialCount.toString();
+    })
     // const users = await this.userToTutorials.findByIds(userIds, {relations: ['user', 'tutorial']});
     // const zz = await this.userToTutorials.find({where: {userId: In(userIds)}, relations: ['user']});
 
