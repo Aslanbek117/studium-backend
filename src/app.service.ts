@@ -10,7 +10,8 @@ export class AppService {
   async handleCron() {
     console.log("starting");
     const result = await this.httpService.get("https://dku-studium.herokuapp.com/").toPromise();
-    console.log("RESULT", result.data);
+    const second = await this.httpService.get("https://dkul-backend.herokuapp.com/api/course/all").toPromise()
+    
   }
 
 
