@@ -38,6 +38,11 @@ export class UserController {
   //   return await this.userService.createDictinary(courseName);
   // }
 
+  @Post('user/update/course')
+  async updateCourse(@Body("user_id") user_id: string,  @Body("course_name") courseName: string) {
+    return await this.userService.updateCourse(user_id, courseName);
+  }
+
   @Post('update')
   async update(@User('id') userId: number, @Body('user') userData: UpdateUserDto) {
     return await this.userService.update(userId, userData);

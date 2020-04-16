@@ -33,6 +33,12 @@ export class UserService {
   }
 
 
+  async updateCourse(userId: string, courseName: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({where: {id: userId}})
+    user.course = courseName;
+    return await this.userRepository.save(user);
+  }
+
   async findOne(loginUserDto: LoginUserDto): Promise<UserEntity> {
     const findOneOptions = {
       email: loginUserDto.email,
