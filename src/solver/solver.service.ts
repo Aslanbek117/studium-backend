@@ -163,7 +163,9 @@ export class SolverService {
     decision.expectedOutput = [];
     for (i = 0; i< tutorial.input.length; i++) {
       
-      const resp = await this.sendToDoodle(body.userCode, "java" ,tutorial.input[i], tutorial.output[i]);
+      const resp = await this.sendToDoodle(body.userCode, body.language, tutorial.input[i], tutorial.output[i]);
+      console.log("response", resp.output);
+      console.log("output", tutorial.output[i]);
       if (resp.output.toString().replace(/[\n\t\r]/g,"") == tutorial.output[i].toString().replace(/[\n\t\r]/g,"")) {
         isCompleted = true;
       } else {isCompleted = false};
@@ -181,6 +183,11 @@ export class SolverService {
       decisions.push(decision);
       
     }
+
+    decisions.map(d => {
+      console.log(d.decision);
+    })
+
 
     let j = 0;
 
@@ -210,11 +217,21 @@ export class SolverService {
 
 
   async sendToDoodle(script: string, language: string, stdin: string, output: string): Promise<JDoodleResponse> {
+    let versionIndex: String;
+
+    if (language == 'java') {
+      versionIndex = "3"
+    } else if (language == 'python3') {
+      versionIndex = "3"
+    } else if (language == 'cpp') {
+      versionIndex = "3"
+    }
+    
     const payload =
       {
         "script": script,
-        "language": "java",
-        "versionIndex": "0",
+        "language": language,
+        "versionIndex": versionIndex,
         "clientId": "b6f883558bfa91616ea62e0a8d3824c1",
         "clientSecret": "658834d2af24e10b7c946058bdb2495cb64d414e3b83307b59e7406ef2dc03ac",
         "stdin": stdin
