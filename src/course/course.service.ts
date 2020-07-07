@@ -2,7 +2,6 @@ import { Injectable, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getRepository, DeleteResult, QueryBuilder, In } from 'typeorm';
 import { CourseEntity } from './course.entity';
-import { Comment } from './comment.entity';
 import { UserEntity } from '../user/user.entity';
 import { CreateCourseDto, DeleteCourseDto } from './dto';
 
@@ -21,8 +20,6 @@ export class CourseService {
   constructor(
     @InjectRepository(CourseEntity)
     private readonly courseRepository: Repository<CourseEntity>,
-    @InjectRepository(Comment)
-    private readonly commentRepository: Repository<Comment>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(SamplePost)
@@ -32,30 +29,6 @@ export class CourseService {
     @InjectRepository(UserToTutorials)
     private readonly userToTutorials: Repository<UserToTutorials>
   ) {}
-
-
-
-
-    async findSampleUsers(): Promise<SampleUser[]> {
-
-      const users = await this.userRepository.find();
-
-      users.map(async u => {
-        const tt = await this.userToTutorials.findOne({where: {userId: u.id}});
-        tt.email = u.email;
-        tt.lastname = u.lastname;
-        tt.username = u.username;
-        tt.course = u.course;
-        await this.userToTutorials.save(tt);
-      })
-
-
-
-
-
-
-      return this.sampleUserRepository.find({relations: ["posts"]});
-    }
 
     async findSamplePosts(): Promise<SamplePost[]> {
       return this.samplePostRepository.find({relations: ['users']});
@@ -108,7 +81,7 @@ export class CourseService {
 
   async findAll(query): Promise<UserWithCourses> {
 
-    const courses = await this.courseRepository.find({relations: ['students', 'chapters', 'chapters.tutorials']});
+    const courses = await this.courseRepository.find({relations: ['students', 'chapters', 'chapters.tutorials', 'students.userToTutorials', 'students.userToTutorials.decisions']});
     let userIds: string[] = [];
     courses.map(c => c.students.map(st => userIds.push(st.id.toString())));
     let chapterCount = 0;
@@ -221,8 +194,7 @@ export class CourseService {
     course.course_overview = courseData.course_overview
     course.card_description = courseData.card_description
     course.img_url = courseData.img_url
-    course.comments = [];
-
+    course.body = courseData.body;
     const newCourse = await this.courseRepository.save(course);
 
     // const author = await this.userRepository.findOne({ where: { id: userId } });
@@ -246,8 +218,8 @@ export class CourseService {
     return {course};
   }
 
-  async delete(slug: string): Promise<DeleteResult> {
-    return await this.courseRepository.delete({ slug: slug});
+  async delete(id: string): Promise<DeleteResult> {
+    return await this.courseRepository.delete({ id: id});
   }
 
   async deleteCourseById(course: DeleteCourseDto) {

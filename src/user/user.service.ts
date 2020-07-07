@@ -29,7 +29,7 @@ export class UserService {
 
 
 
-    return await this.userRepository.find();
+    return await this.userRepository.find({relations: ['userToTutorials','userToTutorials.decisions']});
   }
 
 
@@ -47,13 +47,13 @@ export class UserService {
 
     
 
-    return await this.userRepository.findOne(findOneOptions, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
+    return await this.userRepository.findOne(findOneOptions, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials', "userToTutorials", "userToTutorials.user", "userToTutorials.tutorial", "userToTutorials.decisions"]});
   }
 
 
   async deleteUesr(user_id: string): Promise<String> {
 
-    const user = await this.userRepository.findOne({where: {id: user_id},relations:['userToTutorials']});
+    const user = await this.userRepository.findOne({where: {id: user_id},relations:['userToTutorials','userToTutorials.decisions']});
 
     await this.userRepository.remove(user);
 
@@ -92,6 +92,7 @@ export class UserService {
     newUser.password = password;
     newUser.courses = [];
     newUser.course = course
+    newUser.created_at =  new Date
     const savedUser = await this.userRepository.save(newUser);
     return this.buildUserRO(savedUser);
   }
@@ -117,7 +118,7 @@ export class UserService {
   }
 
   async findById(id: number): Promise<UserRO>{
-    const user = await this.userRepository.findOne(id, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials']});
+    const user = await this.userRepository.findOne(id, {relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials', "userToTutorials", "userToTutorials.user", "userToTutorials.tutorial", "userToTutorials.decisions"]});
 
     if (!user) {
       const errors = {User: ' not found'};
@@ -127,16 +128,30 @@ export class UserService {
     return this.buildUserRO(user);
   }
 
-  async findByEmail({email}): Promise<UserEntity>{
+  async findByEmail({email}){
+
     const user = await this.userRepository.findOne({where: { email: email}, relations: ['courses', 'courses.chapters', 'courses.chapters.tutorials', "userToTutorials", "userToTutorials.user", "userToTutorials.tutorial", "userToTutorials.decisions"]});
-    return user;
+    const userRO = {
+      username: user.username,
+      lastname: user.lastname,
+      email: user.email,
+      course: user.course,
+      bio: user.bio,
+      id: user.id,
+      token: this.generateJWT(user),
+      image: user.image,
+      role: user.role,
+      courses: user.courses,
+      userToTutorials: user.userToTutorials,
+      password: user.password
+    };
+    return userRO;
   }
 
   public generateJWT(user) {
     let today = new Date();
     let exp = new Date(today);
     exp.setDate(today.getDate() + 60);
-
     return jwt.sign({
       id: user.id,
       username: user.username,
@@ -156,7 +171,9 @@ export class UserService {
       token: this.generateJWT(user),
       image: user.image,
       role: user.role,
-      courses: user.courses
+      courses: user.courses,
+      userToTutorials: user.userToTutorials,
+      password: user.password
     };
 
     return {user: userRO};

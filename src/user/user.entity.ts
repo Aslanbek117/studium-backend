@@ -1,10 +1,11 @@
-import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, JoinTable, ManyToMany, OneToMany, ManyToOne} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, JoinTable, ManyToMany, OneToMany, ManyToOne, OneToOne} from "typeorm";
 import * as crypto from 'crypto';
 import { CourseEntity } from '../course/course.entity';
 import { TutorialEntity } from "src/tutorial/tutorial.entity";
-
+import { Comment } from '../comment/comment.entity';
 import { UserToTutorials } from './user-tutorials.entity';
 import { SolverEntity } from "src/solver/solver.entity";
+import { Topic } from "src/topic/topic.entity";
 
 export enum ROLE {
   ADMIN,
@@ -29,6 +30,9 @@ export class UserEntity {
   @Column({nullable: true})
   course: string;
 
+  @Column({nullable: true})
+  created_at: Date
+
   @Column()
   email: string;
 
@@ -44,18 +48,23 @@ export class UserEntity {
   @Column({select: false})
   password: string;
 
-  
+  @OneToMany(type => Topic, topic => topic.user, {nullable: true})
+  topics: Topic[];
+
+  @OneToMany(type=> Comment, comment => comment.user, {nullable: true})
+  comments: Comment[];
+
 
   @BeforeInsert()
   hashPassword() {
     this.password = crypto.createHmac('sha256', this.password).digest('hex');
   }
 
-  @ManyToMany(type => CourseEntity, course => course.students, {cascade: true})
+  @ManyToMany(type => CourseEntity, course => course.students, {cascade: true, onUpdate:'CASCADE'})
   @JoinTable()
   courses: CourseEntity[];
 
-  @OneToMany(type => UserToTutorials, utt => utt.user, {cascade: true, onDelete: "CASCADE"})
+  @OneToMany(type => UserToTutorials, utt => utt.user, {cascade: true, onDelete: "CASCADE", onUpdate: 'CASCADE'})
   userToTutorials: UserToTutorials[];
 
 }

@@ -5,12 +5,12 @@ import { CreateChapterDTO } from './dto';
 import { User } from '../user/user.decorator';
 import { ChapterEntity } from './chapter.entity';
 import { UserEntity } from '../user/user.entity';
-@Controller('chapter')
+@Controller('chapters')
 export class ChapterController {
 
   constructor(private readonly chapterService: ChapterService) {}
 
-  @Get('/chapters/all')
+  @Get('/all')
   async findAll(): Promise<ChapterEntity[]> {
     return await this.chapterService.findAll();
   }
@@ -22,8 +22,8 @@ export class ChapterController {
 
 
   @Post('create')
-  async create(@Body('userId') userId: string, @Body('courseName') articleName: string, @Body('chapter') chapterData: CreateChapterDTO) {
-    return this.chapterService.create(userId, articleName, chapterData.title, chapterData.body);
+  async create(@Body('chapter') chapterDAO: CreateChapterDTO): Promise<ChapterEntity> {
+    return this.chapterService.create(chapterDAO);
   }
 
 

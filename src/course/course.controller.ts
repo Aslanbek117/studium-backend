@@ -16,10 +16,6 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
 
-  @Get("/sample/users/all")
-  async findAllSampleusers(): Promise<SampleUser[]> {
-    return await this.courseService.findSampleUsers();
-  }
 
   @Get("/sample/posts/all")
   async findAllSamplePosts(): Promise<SamplePost[]> {
@@ -87,6 +83,6 @@ export class CourseController {
 
   @Post('delete')
   async delete(@Param() params) {
-    return this.courseService.delete(params.slug);
+    return this.courseService.delete(params.courseId);
   }
 }

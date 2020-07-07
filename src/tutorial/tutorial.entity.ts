@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany,
 import { UserEntity } from '../user/user.entity';
 import { ChapterEntity } from '../chapter/chapter.entity';
 import { UserToTutorials } from 'src/user/user-tutorials.entity';
-
+import { Comment } from '../comment/comment.entity';
 
 
 @Entity('tutorial')
@@ -46,14 +46,16 @@ export class TutorialEntity {
   @ManyToOne(type => ChapterEntity, art => art.tutorials, {onDelete: "CASCADE"})
   chapter: ChapterEntity;
 
-  @OneToOne(type => UserEntity, user => user)
+  @ManyToOne(type => UserEntity)
   author: UserEntity;
 
-  @OneToMany(type => UserToTutorials, utt => utt.tutorial)
+  @OneToMany(type => UserToTutorials, utt => utt.tutorial, {cascade: true, onUpdate: 'CASCADE'})
+  @JoinColumn()
   userToTutorials: UserToTutorials[];
   
 
   @Column({type: 'simple-array', nullable: true})
   tags: string[];
+
 
 }

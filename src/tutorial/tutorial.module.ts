@@ -13,7 +13,7 @@ import { UserToTutorials } from 'src/user/user-tutorials.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ChapterEntity, UserEntity, TutorialEntity, UserToTutorials]), UserModule, CourseModule],
+  imports: [TypeOrmModule.forFeature([ChapterEntity, UserEntity, TutorialEntity, UserToTutorials, CourseEntity, UserToTutorials]), UserModule, CourseModule],
   providers: [TutorialService],
   controllers: [
     TutorialController
@@ -23,12 +23,7 @@ export class TutorialModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .forRoutes(
-        {path: 'tutorial/all', method: RequestMethod.GET},
-        {path: 'tutorial/:title', method: RequestMethod.GET},
-        {path: 'tutorial/article/:articleId', method: RequestMethod.GET},
-        {path: 'tutorial/completed', method: RequestMethod.POST},
-        {path: 'tutorial/create', method: RequestMethod.POST});
+
         
   }
 }

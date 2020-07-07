@@ -9,6 +9,7 @@ import { TutorialModule } from './tutorial.module';
 import { getHeapStatistics } from 'v8';
 import { timer } from 'rxjs';
 import { UserToTutorials } from 'src/user/user-tutorials.entity';
+import { CourseEntity } from 'src/course/course.entity';
 
 const slug = require('slug');
 
@@ -22,7 +23,11 @@ export class TutorialService {
     @InjectRepository(TutorialEntity)
     private readonly tutorialRepository: Repository<TutorialEntity>,
     @InjectRepository(UserToTutorials)
-    private readonly userToTutorialsRepository: Repository<UserToTutorials>
+    private readonly userToTutorialsRepository: Repository<UserToTutorials>,
+    @InjectRepository(CourseEntity)
+    private readonly courseRepostitory: Repository<CourseEntity>,
+    @InjectRepository(UserToTutorials)
+    private readonly userToTutorials: Repository<UserToTutorials>
   ) {}
   async findAll(): Promise<TutorialEntity[]> {
 
@@ -71,19 +76,36 @@ export class TutorialService {
     return "ok";
   }
 
-  async create(userId: string, chapterName: string, tutorialTitle: string, tutorialBody: string, tutorialInput: any[], tutorialOutput: any[], isLecture: boolean, exampleCode: string): Promise<TutorialEntity> {
+  async create(data: CreateTutorialDTO): Promise<TutorialEntity> {
     
     let tutorial = new TutorialEntity();
-    tutorial.title = tutorialTitle;
-    tutorial.body = tutorialBody;
-    tutorial.input = tutorialInput;
-    tutorial.output = tutorialOutput;
-    tutorial.isLecture = isLecture;
-    tutorial.exampleCode = exampleCode;
-    tutorial.author = null;
-    const chapter = await this.chapterRepository.findOne({where: {title: chapterName}});
+    tutorial.title = data.title;
+    tutorial.body = data.body;
+    tutorial.input = data.input;
+    tutorial.output = data.output;
+    tutorial.isLecture = data.isLecture;
+    tutorial.exampleCode = data.exampleCode;
+    const user = await this.userRepository.findOne({where: {id: data.userId}});
+    tutorial.author = user;
+    const chapter = await this.chapterRepository.findOne({where: {id: data.chapterId}, relations: ['course', 'course.students', 'course.students.userToTutorials']});
     tutorial.chapter = chapter;
-    const savedTutorial = this.tutorialRepository.save(tutorial);
+    chapter.course.students
+    const savedTutorial = await this.tutorialRepository.save(tutorial);
+
+    chapter.course.students.map(async st => {
+      let found = st.userToTutorials.find(ust => ust.tutorialId.toString() == savedTutorial.id.toString())
+      console.log("FOUD", found);
+      if (found == undefined) {
+        const tt = new UserToTutorials();
+      tt.userId = st.id;
+      tt.tutorialId = parseInt(savedTutorial.id)
+      tt.tutorial = savedTutorial;
+      tt.user = st;
+      const saved = await this.userToTutorials.save(tt);
+      console.log("save", saved)
+      }
+    })
+
     return savedTutorial;
   }
 

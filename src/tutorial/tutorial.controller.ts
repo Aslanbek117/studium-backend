@@ -24,8 +24,8 @@ export class TutorialController {
 
 
   @Post('create')
-  async create(@Body('userId') userId: string, @Body('chapterName') chapterName: string, @Body('tutorial') tutorialData: CreateTutorialDTO) {
-    return this.tutorialService.create(userId, chapterName, tutorialData.title, tutorialData.body, tutorialData.input, tutorialData.output, tutorialData.isLecture, tutorialData.exampleCode);
+  async create(@Body('tutorial') tutorialData: CreateTutorialDTO) {
+    return this.tutorialService.create(tutorialData);
   }
 
   @Post('completed')

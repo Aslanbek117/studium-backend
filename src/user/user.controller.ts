@@ -12,7 +12,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get(':email')
-  async findMe(@Param() email): Promise<UserEntity> {
+  async findMe(@Param() email){
     return await this.userService.findByEmail(email);
   }
 
@@ -71,8 +71,8 @@ export class UserController {
 
     const token = await this.userService.generateJWT(_user);
     
-    const {email, username, lastname, course, bio, image, role, id, courses} = _user;
-    const user = {email, token, username, lastname, course, bio, image, role, id, courses};
+    const {email, username, lastname, course, bio, image, role, id, courses, userToTutorials, password} = _user;
+    const user = {email, token, username, lastname, course, bio, image, role, id, courses, userToTutorials, password};
     return {user};
   }
 }

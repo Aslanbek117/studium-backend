@@ -6,11 +6,11 @@ export class AppService {
   constructor(
     private httpService: HttpService
   )  {}
-  @Cron('45 * * * * *')
+  @Cron('45 * * 5 * *')
   async handleCron() {
     console.log("starting");
-    const result = await this.httpService.get("https://dku-studium.herokuapp.com/").toPromise();
-    const second = await this.httpService.get("https://dkul-backend.herokuapp.com/api/course/all").toPromise()
+    // const result = await this.httpService.get("https://dku-studium.herokuapp.com/").toPromise();
+    // const second = await this.httpService.get("https://dkul-backend.herokuapp.com/api/course/all").toPromise()
     
   }
 

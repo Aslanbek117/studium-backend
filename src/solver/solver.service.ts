@@ -198,8 +198,6 @@ export class SolverService {
     
     ust.isCompleted = isCompleted;
     ust.isViewed = true;
-    ust.code = body.userCode;
-
     await this.userToTutorialsRepository.save(ust);
 
 

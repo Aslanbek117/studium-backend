@@ -14,10 +14,10 @@ export class ChapterService {
   constructor(
     @InjectRepository(CourseEntity)
     private readonly courseRepository: Repository<CourseEntity>,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(ChapterEntity)
     private readonly chapterRepository: Repository<ChapterEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
   async findAll(): Promise<ChapterEntity[]> {
 
@@ -54,13 +54,15 @@ export class ChapterService {
     return this.chapterRepository.save(t);
   }
 
-  async create(userId: string, courseName: string, chapterTitle: string, chapterBody: string): Promise<ChapterEntity> {
+  async create(chapterData: CreateChapterDTO): Promise<ChapterEntity> {
+    console.log("create chapter reqeust", chapterData)
     let chapter = new ChapterEntity();
-    chapter.title = chapterTitle;
-    chapter.body = chapterBody;
-    // const user = await this.userRepository.findOne({where: {id: userId}});
-    chapter.author = null;
-    const course = await this.courseRepository.findOne({where: {title: courseName}});
+    chapter.title = chapterData.title;
+    chapter.body = chapterData.body;
+    const user = await this.userRepository.findOne({where: {id: chapterData.userId}})
+    console.log("user", user)
+    chapter.author = user;
+    const course = await this.courseRepository.findOne({where: {id: chapterData.courseId}});
     chapter.course = course;
     const savedChapter = this.chapterRepository.save(chapter);
     return savedChapter;

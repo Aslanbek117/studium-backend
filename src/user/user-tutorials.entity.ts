@@ -14,20 +14,6 @@ export class UserToTutorials {
     @Column()
     public tutorialId!: number;
    
-    @Column({nullable: true})
-    username: string;
-
-    @Column({nullable: true})
-    lastname: string;
-
-    @Column({nullable: true})
-    email: string;
-
-    @Column({nullable: true})
-    course: string;
-
-    @Column({nullable: true})
-    code: string;
 
     @Column({default: false})
     isCompleted: boolean;

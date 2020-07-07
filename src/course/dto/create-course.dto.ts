@@ -4,4 +4,5 @@ export class CreateCourseDto {
   readonly course_overview: string;
   readonly img_url: string;
   readonly card_description: string;
+  readonly body: string;
 }
