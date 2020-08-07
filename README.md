@@ -1,3 +1,12 @@
+# I made a mistake
+## NestJS with GraphQL in another project
+# Please see this prject
+https://github.com/Aslanbek117/checker
+
+
+
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
