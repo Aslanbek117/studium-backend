@@ -1,6 +1,6 @@
 # I made a mistake
 ## NestJS with GraphQL in another project
-# Please see this prject
+# Please see this project
 https://github.com/Aslanbek117/checker
 
 
